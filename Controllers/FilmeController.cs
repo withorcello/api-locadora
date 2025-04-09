@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ApiLocadora.Dtos;
 
 namespace ApiLocadora.Controllers
 {
@@ -7,31 +8,57 @@ namespace ApiLocadora.Controllers
     [ApiController]
     public class FilmeController : ControllerBase
     {
-
-        [HttpGet]
-        public IActionResult BuscaFilmes()
-        {
-            List<Filme> filmes = new List<Filme>();
-
-            filmes.Add(new Filme
-            {
+        private static List<Filme> listaFilmes = [ 
+            new Filme() { 
                 Nome = "Fast and Furious",
                 Genero = "Action"
-            });
-            
-            filmes.Add(new Filme
+            },
+            new Filme
             {
                 Nome = "Fast and Furious II",
                 Genero = "Action"
-            });
-            
-            filmes.Add(new Filme
+            },
+            new Filme
             {
                 Nome = "Fast and Furious - In Tokio",
                 Genero = "Action"
-            });
+            }
+        ];
 
-            return Ok(filmes);
+        [HttpGet]
+        public IActionResult Buscar()
+        {
+            return Ok(listaFilmes);
+        }
+
+        [HttpPost]
+        public IActionResult Cadastrar([FromBody] FilmeDto item)
+        {
+            var filme = new Filme();
+            filme.Nome = item.Nome;
+            filme.Genero = item.Genero;
+
+            listaFilmes.Add(filme);
+
+            return Ok(filme);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Atualizar(Guid id, [FromBody] FilmeDto item)
+        {
+            //Exemplo de NotFound
+            if(id != Guid.NewGuid())
+            {
+                return NotFound();
+            }
+
+            return Ok();
+        }
+        
+        [HttpDelete("{id}")]
+        public IActionResult Remover(Guid id)
+        {
+            return Ok();
         }
     }
 }
