@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ApiLocadora.Dtos;
+using ApiLocadora.DataContext;
 
 namespace ApiLocadora.Controllers
 {
@@ -8,27 +8,27 @@ namespace ApiLocadora.Controllers
     [ApiController]
     public class FilmeController : ControllerBase
     {
-        private static List<Filme> listaFilmes = [ 
-            new Filme() { 
-                Nome = "Fast and Furious",
-                Genero = "Action"
-            },
-            new Filme
-            {
-                Nome = "Fast and Furious II",
-                Genero = "Action"
-            },
-            new Filme
-            {
-                Nome = "Fast and Furious - In Tokio",
-                Genero = "Action"
-            }
-        ];
+        private readonly AppDbContext _context;
+
+        public FilmeController(AppDbContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
         public IActionResult Buscar()
         {
-            return Ok(listaFilmes);
+            var filmes = _context.Filmes.ToList();
+            return Ok(filmes);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult BuscarPorId(int id, [FromBody] FilmeDto item)
+        {
+            var filme = _context.Filmes.FirstOrDefault(filme => filme.Id == id);
+            if (filme == null) return NotFound("Filme não encontrado.");
+
+            return Ok(filme);
         }
 
         [HttpPost]
@@ -38,27 +38,33 @@ namespace ApiLocadora.Controllers
             filme.Nome = item.Nome;
             filme.Genero = item.Genero;
 
-            listaFilmes.Add(filme);
+            _context.Filmes.Add(filme);
+            _context.SaveChanges();
 
-            return Ok(filme);
+            return Ok("Filme cadastrado com sucesso.");
         }
 
         [HttpPut("{id}")]
-        public IActionResult Atualizar(Guid id, [FromBody] FilmeDto item)
+        public IActionResult Atualizar(int id, [FromBody] FilmeDto item)
         {
-            //Exemplo de NotFound
-            if(id != Guid.NewGuid())
-            {
-                return NotFound();
-            }
+            var filme = _context.Filmes.FirstOrDefault(filme => filme.Id == id);
+            if (filme == null) return NotFound("Filme não encontrado.");
 
-            return Ok();
+            filme.Nome = item.Nome;
+            filme.Genero = item.Genero;
+
+            return Ok("Filme atualizado com sucesso!");
         }
-        
+
         [HttpDelete("{id}")]
-        public IActionResult Remover(Guid id)
+        public IActionResult Remover(int id)
         {
-            return Ok();
+            var filme = _context.Filmes.FirstOrDefault(filme => filme.Id == id);
+            if (filme == null) return NotFound("Filme não encontrado.");
+
+            _context.Filmes.Remove(filme);
+
+            return Ok("Filme removido com sucesso!");
         }
     }
 }
