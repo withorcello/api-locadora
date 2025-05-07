@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ApiLocadora.Dtos;
-using ApiLocadora.DataContext;
+using ApiLocadora.Services;
 
 namespace ApiLocadora.Controllers
 {
@@ -8,25 +8,24 @@ namespace ApiLocadora.Controllers
     [ApiController]
     public class FilmeController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly FilmeService _service;
 
-        public FilmeController(AppDbContext context)
+        public FilmeController(FilmeService service)
         {
-            _context = context;
+            _service = service;
         }
 
         [HttpGet]
         public IActionResult Buscar()
         {
-            var filmes = _context.Filmes.ToList();
+            var filmes = _service.Buscar();
             return Ok(filmes);
         }
 
         [HttpGet("{id}")]
-        public IActionResult BuscarPorId(int id, [FromBody] FilmeDto item)
+        public IActionResult BuscarPorId(int id)
         {
-            var filme = _context.Filmes.FirstOrDefault(filme => filme.Id == id);
-            if (filme == null) return NotFound("Filme não encontrado.");
+            var filme = _service.BuscarPorId(id);
 
             return Ok(filme);
         }
@@ -34,12 +33,7 @@ namespace ApiLocadora.Controllers
         [HttpPost]
         public IActionResult Cadastrar([FromBody] FilmeDto item)
         {
-            var filme = new Filme();
-            filme.Nome = item.Nome;
-            filme.Genero = item.Genero;
-
-            _context.Filmes.Add(filme);
-            _context.SaveChanges();
+            _service.Cadastrar(item);
 
             return Ok("Filme cadastrado com sucesso.");
         }
@@ -47,11 +41,7 @@ namespace ApiLocadora.Controllers
         [HttpPut("{id}")]
         public IActionResult Atualizar(int id, [FromBody] FilmeDto item)
         {
-            var filme = _context.Filmes.FirstOrDefault(filme => filme.Id == id);
-            if (filme == null) return NotFound("Filme não encontrado.");
-
-            filme.Nome = item.Nome;
-            filme.Genero = item.Genero;
+            _service.Atualizar(id, item);
 
             return Ok("Filme atualizado com sucesso!");
         }
@@ -59,10 +49,7 @@ namespace ApiLocadora.Controllers
         [HttpDelete("{id}")]
         public IActionResult Remover(int id)
         {
-            var filme = _context.Filmes.FirstOrDefault(filme => filme.Id == id);
-            if (filme == null) return NotFound("Filme não encontrado.");
-
-            _context.Filmes.Remove(filme);
+            _service.Remover(id);
 
             return Ok("Filme removido com sucesso!");
         }

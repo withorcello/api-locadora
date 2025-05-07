@@ -1,4 +1,5 @@
 using ApiLocadora.DataContext;
+using ApiLocadora.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
     .UseSnakeCaseNamingConvention()
 );
+
+builder.Services.AddScoped<FilmeService>();
 
 var app = builder.Build();
 
