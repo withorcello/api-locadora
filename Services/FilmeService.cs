@@ -1,7 +1,6 @@
 ﻿using ApiLocadora.DataContext;
 using ApiLocadora.Dtos;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using ApiLocadora.Entities;
 
 namespace ApiLocadora.Services
 {
@@ -29,12 +28,9 @@ namespace ApiLocadora.Services
 
         public void Cadastrar(FilmeDto item)
         {
-            var filme = new Filme();
-            filme.Nome = item.Nome;
-            filme.Genero = item.Genero;
-            filme.DataLancamento = item.DataLancamento;
-
+            var filme = new Filme(item.Nome, item.DataLancamento, item.GeneroId, item.EstudioId);
             _context.Filmes.Add(filme);
+
             _context.SaveChanges();
         }
 
@@ -44,8 +40,9 @@ namespace ApiLocadora.Services
             if (filme == null) throw new BadHttpRequestException("Filme não encontrado.");
 
             filme.Nome = item.Nome;
-            filme.Genero = item.Genero;
             filme.DataLancamento = item.DataLancamento;
+            filme.GeneroId = item.GeneroId;
+            filme.EstudioId = item.EstudioId;
 
             _context.SaveChanges();
         }
